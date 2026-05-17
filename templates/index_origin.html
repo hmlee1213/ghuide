@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>어디가시꺄 — 강화 여행 가이드</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#F7F5F0;--surface:#fff;--surface2:#EDEBE6;--border:#DDDAD3;
+  --text:#1C1A17;--text-muted:#5A5750;--text-sub:#96938D;
+  --green:#3D6B35;--green-light:#EAF2E7;--green-dark:#2A4E24;
+  --red:#C0392B;--red-light:#FDECEA;
+  --orange:#D4622A;--orange-light:#FDF0EA;
+  --radius:10px;--shadow:0 1px 4px rgba(0,0,0,.07);--shadow-md:0 4px 16px rgba(0,0,0,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);font-size:14px;-webkit-font-smoothing:antialiased;}
+
+/* Header */
+header{background:var(--text);color:#fff;padding:0 20px;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.25);}
+.header-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;height:50px;gap:12px;}
+.logo{font-size:17px;font-weight:800;color:#fff;letter-spacing:-.01em;}
+.logo span{color:#A8D49A;font-size:12px;font-weight:500;margin-left:6px;}
+
+/* Tab bar */
+.tab-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;position:sticky;top:50px;z-index:99;}
+.tab-bar-inner{max-width:1100px;margin:0 auto;display:flex;}
+.tab{padding:13px 16px;font-size:13px;font-weight:600;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;white-space:nowrap;user-select:none;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--green);border-bottom-color:var(--green);}
+
+/* Main */
+.main{max-width:1100px;margin:0 auto;padding:20px 20px 80px;}
+
+/* Filter bar */
+.filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.filter-bar input[type=date],.filter-bar input[type=time]{
+  font-family:inherit;font-size:13px;font-weight:600;padding:6px 10px;
+  border:1.5px solid var(--border);border-radius:7px;background:var(--surface);
+  color:var(--text);cursor:pointer;outline:none;
+}
+.filter-bar input:focus{border-color:var(--green);}
+.chip{font-size:12px;font-weight:600;font-family:inherit;padding:5px 13px;
+  border-radius:20px;border:1.5px solid var(--border);background:var(--surface);
+  color:var(--text-muted);cursor:pointer;transition:all .12s;white-space:nowrap;}
+.chip:hover{border-color:var(--text);color:var(--text);}
+.chip.active{background:var(--text);border-color:var(--text);color:#fff;}
+.chip.green.active{background:var(--green);border-color:var(--green);}
+.filter-label{font-size:12px;color:var(--text-sub);margin-right:2px;}
+.filter-sep{width:1px;height:20px;background:var(--border);margin:0 4px;}
+
+/* Result meta */
+.result-meta{font-size:12px;color:var(--text-sub);margin-bottom:14px;}
+.result-meta strong{color:var(--text-muted);}
+
+/* Store grid */
+.store-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+
+/* Store card */
+.store-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:box-shadow .12s,transform .12s;position:relative;}
+.store-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px);}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.card-name{font-size:15px;font-weight:700;line-height:1.3;}
+.card-category{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:var(--surface2);color:var(--text-muted);white-space:nowrap;flex-shrink:0;margin-left:8px;margin-top:2px;}
+.card-status{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.status-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;}
+.status-open{background:var(--green-light);color:var(--green);}
+.status-closed{background:var(--red-light);color:var(--red);}
+.status-unknown{background:var(--surface2);color:var(--text-sub);}
+.card-hours{font-size:12px;color:var(--text-muted);}
+.card-desc{font-size:12px;color:var(--text-sub);margin-top:6px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.card-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+.tag{font-size:11px;color:var(--text-muted);background:var(--surface2);padding:2px 7px;border-radius:4px;}
+.card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);}
+.btn-plan{font-size:12px;font-weight:700;font-family:inherit;padding:5px 13px;border-radius:6px;border:1.5px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;transition:all .12s;}
+.btn-plan:hover{border-color:var(--green);color:var(--green);}
+.btn-plan.planned{background:var(--green-light);border-color:var(--green);color:var(--green);}
+.card-price{font-size:11px;color:var(--text-sub);}
+
+/* Store list (가게 목록 탭) */
+.store-list-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:box-shadow .12s;}
+.store-list-row:hover{box-shadow:var(--shadow);}
+.list-name{font-size:14px;font-weight:700;flex:1;}
+.list-category{font-size:11px;font-weight:600;color:var(--text-sub);width:60px;flex-shrink:0;}
+.list-hours-col{font-size:12px;color:var(--text-muted);min-width:160px;}
+.list-tags{display:flex;gap:4px;flex-wrap:wrap;flex:1;}
+.btn-plan-sm{font-size:11px;font-weight:700;font-family:inherit;padding:4px 10px;border-radius:5px;border:1.5px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;transition:all .12s;white-space:nowrap;}
+.btn-plan-sm:hover{border-color:var(--green);color:var(--green);}
+.btn-plan-sm.planned{background:var(--green-light);border-color:var(--green);color:var(--green);}
+
+/* 가게 상세 모달 */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:14px;padding:28px;max-width:500px;width:calc(100% - 32px);max-height:80vh;overflow-y:auto;position:relative;}
+.modal-close{position:absolute;top:16px;right:16px;font-size:20px;background:none;border:none;cursor:pointer;color:var(--text-sub);line-height:1;}
+.modal-name{font-size:20px;font-weight:800;margin-bottom:4px;}
+.modal-cat{font-size:12px;color:var(--text-sub);margin-bottom:16px;}
+.modal-section{margin-bottom:14px;}
+.modal-section-title{font-size:11px;font-weight:700;color:var(--text-sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.hours-grid{display:grid;grid-template-columns:50px 1fr;gap:4px 8px;font-size:13px;}
+.hours-grid .day{color:var(--text-sub);}
+.hours-grid .day.today{font-weight:700;color:var(--green);}
+.hours-grid .time{color:var(--text);}
+.hours-grid .off{color:var(--text-sub);}
+
+/* 플래너 탭 */
+.planner-header{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.planner-date-selector{display:flex;gap:6px;flex-wrap:wrap;}
+.planner-date-btn{font-size:12px;font-weight:600;font-family:inherit;padding:5px 13px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);color:var(--text-muted);cursor:pointer;transition:all .12s;}
+.planner-date-btn:hover{border-color:var(--text);color:var(--text);}
+.planner-date-btn.active{background:var(--text);border-color:var(--text);color:#fff;}
+.planner-custom-date{font-family:inherit;font-size:13px;font-weight:600;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);outline:none;}
+.planner-custom-date:focus{border-color:var(--green);}
+.btn-share{font-size:12px;font-weight:700;font-family:inherit;padding:6px 14px;border-radius:7px;border:1.5px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;transition:all .12s;margin-left:auto;}
+.btn-share:hover{border-color:var(--green);color:var(--green);}
+.planner-empty{text-align:center;padding:60px 20px;color:var(--text-sub);font-size:14px;line-height:2;}
+.planner-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+.planner-item-name{font-size:14px;font-weight:700;flex:1;}
+.planner-item-cat{font-size:11px;color:var(--text-sub);}
+.planner-memo{font-family:inherit;font-size:12px;padding:4px 8px;border:1.5px solid var(--border);border-radius:6px;width:160px;outline:none;color:var(--text);}
+.planner-memo:focus{border-color:var(--green);}
+.btn-remove{font-size:18px;background:none;border:none;cursor:pointer;color:var(--text-sub);line-height:1;padding:0 2px;}
+.btn-remove:hover{color:var(--red);}
+.planner-order{font-size:22px;font-weight:800;color:var(--surface2);width:28px;text-align:center;flex-shrink:0;}
+
+/* 빈 상태 */
+.empty{text-align:center;padding:60px 20px;color:var(--text-sub);line-height:2;}
+.empty strong{display:block;font-size:16px;color:var(--text-muted);margin-bottom:8px;}
+
+/* 로딩 */
+.loading{text-align:center;padding:40px;color:var(--text-sub);font-size:13px;}
+
+/* 반응형 */
+@media(max-width:600px){
+  .store-grid{grid-template-columns:1fr;}
+  .list-tags,.list-hours-col{display:none;}
+  .filter-bar{gap:6px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">어디가시꺄 <span>강화 여행 가이드</span></div>
+  </div>
+</header>
+
+<div class="tab-bar">
+  <div class="tab-bar-inner">
+    <div class="tab active" data-tab="now" onclick="switchTab('now')">지금 열린 곳</div>
+    <div class="tab" data-tab="date" onclick="switchTab('date')">날짜별 보기</div>
+    <div class="tab" data-tab="list" onclick="switchTab('list')">가게 목록</div>
+    <div class="tab" data-tab="planner" onclick="switchTab('planner')">내 플래너</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- 지금 열린 곳 -->
+  <div id="tab-now">
+    <div class="filter-bar">
+      <span class="filter-label">카테고리</span>
+      <span class="chip active" data-cat="" onclick="setCat(this,'now')">전체</span>
+      <span class="chip" data-cat="cafe" onclick="setCat(this,'now')">카페</span>
+      <span class="chip" data-cat="restaurant" onclick="setCat(this,'now')">식사</span>
+      <span class="chip" data-cat="experience" onclick="setCat(this,'now')">체험</span>
+      <span class="chip" data-cat="attraction" onclick="setCat(this,'now')">명소</span>
+    </div>
+    <div class="result-meta" id="now-meta"></div>
+    <div class="store-grid" id="now-grid"><div class="loading">불러오는 중...</div></div>
+  </div>
+
+  <!-- 날짜별 보기 -->
+  <div id="tab-date" style="display:none">
+    <div class="filter-bar">
+      <input type="date" id="date-picker" onchange="loadDate()">
+      <input type="time" id="time-picker" onchange="loadDate()">
+      <div class="filter-sep"></div>
+      <span class="filter-label">카테고리</span>
+      <span class="chip active" data-cat="" onclick="setCat(this,'date')">전체</span>
+      <span class="chip" data-cat="cafe" onclick="setCat(this,'date')">카페</span>
+      <span class="chip" data-cat="restaurant" onclick="setCat(this,'date')">식사</span>
+      <span class="chip" data-cat="experience" onclick="setCat(this,'date')">체험</span>
+      <span class="chip" data-cat="attraction" onclick="setCat(this,'date')">명소</span>
+      <div class="filter-sep"></div>
+      <span class="chip green" id="open-only-chip" onclick="toggleOpenOnly()">영업 중만</span>
+    </div>
+    <div class="result-meta" id="date-meta"></div>
+    <div class="store-grid" id="date-grid"><div class="loading">불러오는 중...</div></div>
+  </div>
+
+  <!-- 가게 목록 -->
+  <div id="tab-list" style="display:none">
+    <div class="filter-bar">
+      <span class="chip active" data-cat="" onclick="setCat(this,'list')">전체</span>
+      <span class="chip" data-cat="cafe" onclick="setCat(this,'list')">카페</span>
+      <span class="chip" data-cat="restaurant" onclick="setCat(this,'list')">식사</span>
+      <span class="chip" data-cat="experience" onclick="setCat(this,'list')">체험</span>
+      <span class="chip" data-cat="attraction" onclick="setCat(this,'list')">명소</span>
+    </div>
+    <div id="list-grid"></div>
+  </div>
+
+  <!-- 내 플래너 -->
+  <div id="tab-planner" style="display:none">
+    <div class="planner-header">
+      <div class="planner-date-selector" id="planner-dates"></div>
+      <input type="date" class="planner-custom-date" id="planner-date-input" onchange="setPlannerDate(this.value)">
+      <button class="btn-share" onclick="sharePlanner()">링크 복사</button>
+    </div>
+    <div id="planner-content"></div>
+  </div>
+
+</div>
+
+<!-- 가게 상세 모달 -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" id="modal-body">
+    <button class="modal-close" onclick="closeModalBtn()">✕</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script>
+// ── 상태 ─────────────────────────────────────────────
+const DAYS = ['일','월','화','수','목','금','토'];
+const CATS = {cafe:'카페', restaurant:'식사', experience:'체험', attraction:'명소'};
+const PRICE = {low:'저렴', mid:'보통', high:'고가'};
+const PLANNER_KEY = 'ghuide_planner_v1';
+const STORE_CACHE_KEY = 'ghuide_stores_cache';
+
+let state = {
+  tab: 'now',
+  nowCat: '', dateCat: '', listCat: '',
+  openOnly: false,
+  plannerDate: today(),
+  allStores: []
+};
+
+function today() { return new Date().toISOString().slice(0,10); }
+function nowTime() { return new Date().toTimeString().slice(0,5); }
+
+// ── 탭 전환 ──────────────────────────────────────────
+function switchTab(tab) {
+  state.tab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  ['now','date','list','planner'].forEach(t => {
+    document.getElementById('tab-' + t).style.display = t === tab ? '' : 'none';
+  });
+  if (tab === 'now')     loadNow();
+  if (tab === 'date')    initDate();
+  if (tab === 'list')    loadList();
+  if (tab === 'planner') renderPlanner();
+}
+
+// ── 카테고리 필터 ─────────────────────────────────────
+function setCat(el, tab) {
+  const parent = el.closest('.filter-bar');
+  parent.querySelectorAll('.chip[data-cat]').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  state[tab + 'Cat'] = el.dataset.cat;
+  if (tab === 'now')  loadNow();
+  if (tab === 'date') loadDate();
+  if (tab === 'list') renderList();
+}
+
+function toggleOpenOnly() {
+  state.openOnly = !state.openOnly;
+  document.getElementById('open-only-chip').classList.toggle('active', state.openOnly);
+  loadDate();
+}
+
+// ── 지금 열린 곳 ──────────────────────────────────────
+async function loadNow() {
+  const d = today(), t = nowTime();
+  const params = new URLSearchParams({ date: d, time: t });
+  if (state.nowCat) params.set('category', state.nowCat);
+
+  const grid = document.getElementById('now-grid');
+  grid.innerHTML = '<div class="loading">불러오는 중...</div>';
+  try {
+    const rows = await fetch('/api/stores?' + params).then(r => r.json());
+    const open = rows.filter(r => r.is_open);
+    const closed = rows.filter(r => !r.is_open);
+    document.getElementById('now-meta').innerHTML =
+      `<strong>${open.length}곳</strong> 지금 영업 중 · ${closed.length}곳 닫힘 · ${t} 기준`;
+    grid.innerHTML = '';
+    if (!rows.length) { grid.innerHTML = emptyHTML('등록된 가게가 없어요'); return; }
+    // 열린 곳 먼저
+    [...open, ...closed].forEach(s => grid.appendChild(storeCard(s, d)));
+  } catch(e) {
+    grid.innerHTML = emptyHTML('불러오기 실패');
+  }
+}
+
+// ── 날짜별 보기 ───────────────────────────────────────
+function initDate() {
+  const dp = document.getElementById('date-picker');
+  const tp = document.getElementById('time-picker');
+  if (!dp.value) dp.value = today();
+  if (!tp.value) tp.value = nowTime();
+  loadDate();
+}
+
+async function loadDate() {
+  const d = document.getElementById('date-picker').value || today();
+  const t = document.getElementById('time-picker').value || nowTime();
+  const params = new URLSearchParams({ date: d, time: t });
+  if (state.dateCat) params.set('category', state.dateCat);
+  if (state.openOnly) params.set('open_only', 'true');
+
+  const grid = document.getElementById('date-grid');
+  grid.innerHTML = '<div class="loading">불러오는 중...</div>';
+  try {
+    const rows = await fetch('/api/stores?' + params).then(r => r.json());
+    const open = rows.filter(r => r.is_open).length;
+    document.getElementById('date-meta').innerHTML =
+      `<strong>${rows.length}곳</strong> 중 <strong>${open}곳</strong> ${t} 기준 영업 중`;
+    grid.innerHTML = '';
+    if (!rows.length) { grid.innerHTML = emptyHTML('조건에 맞는 가게가 없어요'); return; }
+    rows.forEach(s => grid.appendChild(storeCard(s, d)));
+  } catch(e) {
+    grid.innerHTML = emptyHTML('불러오기 실패');
+  }
+}
+
+// ── 가게 목록 ─────────────────────────────────────────
+async function loadList() {
+  if (state.allStores.length) { renderList(); return; }
+  try {
+    state.allStores = await fetch('/api/stores?date=' + today() + '&time=12:00').then(r => r.json());
+    renderList();
+  } catch(e) {
+    document.getElementById('list-grid').innerHTML = emptyHTML('불러오기 실패');
+  }
+}
+
+function renderList() {
+  const grid = document.getElementById('list-grid');
+  const stores = state.listCat
+    ? state.allStores.filter(s => s.category === state.listCat)
+    : state.allStores;
+  if (!stores.length) { grid.innerHTML = emptyHTML('가게가 없어요'); return; }
+  grid.innerHTML = '';
+  stores.forEach(s => {
+    const el = document.createElement('div');
+    el.className = 'store-list-row';
+    const planned = isPlannerItem(s.id, state.plannerDate);
+    el.innerHTML = `
+      <div class="list-name">${esc(s.name)}</div>
+      <div class="list-category">${CATS[s.category]||s.category||''}</div>
+      <div class="list-hours-col">${hoursText(s)}</div>
+      <div class="list-tags">${(s.menu_tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
+      <button class="btn-plan-sm${planned?' planned':''}" onclick="event.stopPropagation();togglePlanner(${s.id},'${esc(s.name)}','${s.category||''}',this)">${planned?'✓ 계획됨':'+ 플래너'}</button>
+    `;
+    el.addEventListener('click', () => openModal(s.id));
+    grid.appendChild(el);
+  });
+}
+
+// ── 가게 카드 ─────────────────────────────────────────
+function storeCard(s, d) {
+  const el = document.createElement('div');
+  el.className = 'store-card';
+  const planned = isPlannerItem(s.id, d);
+  const statusHtml = s.is_open
+    ? `<span class="status-badge status-open">영업 중</span><span class="card-hours">${hoursText(s)}</span>`
+    : s.closed_reason
+      ? `<span class="status-badge status-closed">${esc(s.closed_reason)}</span>`
+      : `<span class="status-badge status-unknown">정보 없음</span>`;
+
+  el.innerHTML = `
+    <div class="card-top">
+      <div class="card-name">${esc(s.name)}</div>
+      <span class="card-category">${CATS[s.category]||s.category||'기타'}</span>
+    </div>
+    <div class="card-status">${statusHtml}</div>
+    ${s.description ? `<div class="card-desc">${esc(s.description)}</div>` : ''}
+    ${(s.menu_tags||[]).length ? `<div class="card-tags">${s.menu_tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
+    <div class="card-footer">
+      <span class="card-price">${s.price_range ? PRICE[s.price_range]||'' : ''}</span>
+      <button class="btn-plan${planned?' planned':''}" onclick="event.stopPropagation();togglePlanner(${s.id},'${esc(s.name)}','${s.category||''}',this,'${d}')">${planned?'✓ 계획됨':'+ 플래너'}</button>
+    </div>
+  `;
+  el.addEventListener('click', () => openModal(s.id));
+  return el;
+}
+
+function hoursText(s) {
+  if (!s.today_open && !s.today_close) return '영업시간 미등록';
+  let t = `${s.today_open||''} – ${s.today_close||''}`;
+  if (s.break) t += ` (브레이크 ${s.break})`;
+  return t;
+}
+
+// ── 플래너 ────────────────────────────────────────────
+function getPlanner() {
+  try { return JSON.parse(localStorage.getItem(PLANNER_KEY) || '{}'); } catch { return {}; }
+}
+function savePlanner(p) { localStorage.setItem(PLANNER_KEY, JSON.stringify(p)); }
+
+function isPlannerItem(id, d) {
+  const p = getPlanner();
+  return !!(p[d] && p[d].find(s => s.id == id));
+}
+
+function togglePlanner(id, name, category, btn, d) {
+  const date = d || state.plannerDate;
+  const p = getPlanner();
+  if (!p[date]) p[date] = [];
+  const idx = p[date].findIndex(s => s.id == id);
+  if (idx >= 0) {
+    p[date].splice(idx, 1);
+    if (!p[date].length) delete p[date];
+    btn.textContent = '+ 플래너';
+    btn.classList.remove('planned');
+  } else {
+    p[date].push({ id, name, category, memo: '' });
+    btn.textContent = '✓ 계획됨';
+    btn.classList.add('planned');
+  }
+  savePlanner(p);
+  if (state.tab === 'planner') renderPlanner();
+}
+
+function setPlannerDate(d) {
+  state.plannerDate = d;
+  document.querySelectorAll('.planner-date-btn').forEach(b => b.classList.toggle('active', b.dataset.d === d));
+  renderPlanner();
+}
+
+function renderPlanner() {
+  // 날짜 버튼 (오늘~+6일)
+  const dates = document.getElementById('planner-dates');
+  const existing = getPlanner();
+  dates.innerHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(); d.setDate(d.getDate() + i);
+    const ds = d.toISOString().slice(0,10);
+    const label = i === 0 ? '오늘' : i === 1 ? '내일' : `${d.getMonth()+1}/${d.getDate()}`;
+    const count = existing[ds]?.length || 0;
+    const btn = document.createElement('button');
+    btn.className = 'planner-date-btn' + (ds === state.plannerDate ? ' active' : '');
+    btn.dataset.d = ds;
+    btn.textContent = label + (count ? ` (${count})` : '');
+    btn.onclick = () => setPlannerDate(ds);
+    dates.appendChild(btn);
+  }
+  document.getElementById('planner-date-input').value = state.plannerDate;
+
+  const content = document.getElementById('planner-content');
+  const items = existing[state.plannerDate] || [];
+  if (!items.length) {
+    content.innerHTML = `<div class="planner-empty">아직 계획이 없어요.<br>가게 목록에서 + 플래너를 눌러 추가해보세요.</div>`;
+    return;
+  }
+  content.innerHTML = '';
+  items.forEach((s, i) => {
+    const el = document.createElement('div');
+    el.className = 'planner-item';
+    el.innerHTML = `
+      <div class="planner-order">${i+1}</div>
+      <div style="flex:1">
+        <div class="planner-item-name">${esc(s.name)}</div>
+        <div class="planner-item-cat">${CATS[s.category]||''}</div>
+      </div>
+      <input class="planner-memo" placeholder="메모" value="${esc(s.memo||'')}"
+             onchange="updateMemo(${s.id},'${state.plannerDate}',this.value)">
+      <button class="btn-remove" onclick="removePlanner(${s.id},'${state.plannerDate}')">×</button>
+    `;
+    content.appendChild(el);
+  });
+}
+
+function updateMemo(id, d, memo) {
+  const p = getPlanner();
+  const item = p[d]?.find(s => s.id == id);
+  if (item) { item.memo = memo; savePlanner(p); }
+}
+
+function removePlanner(id, d) {
+  const p = getPlanner();
+  if (p[d]) {
+    p[d] = p[d].filter(s => s.id != id);
+    if (!p[d].length) delete p[d];
+    savePlanner(p);
+  }
+  renderPlanner();
+}
+
+function sharePlanner() {
+  const items = getPlanner()[state.plannerDate] || [];
+  if (!items.length) { alert('계획이 없어요.'); return; }
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(items))));
+  const url = `${location.origin}/?plan=${encoded}&date=${state.plannerDate}`;
+  navigator.clipboard.writeText(url).then(() => alert('링크가 복사되었어요!'));
+}
+
+// 공유 링크로 들어온 경우 import
+function importSharedPlan() {
+  const params = new URLSearchParams(location.search);
+  const plan = params.get('plan');
+  const d = params.get('date');
+  if (!plan || !d) return;
+  try {
+    const items = JSON.parse(decodeURIComponent(escape(atob(plan))));
+    const p = getPlanner();
+    p[d] = items;
+    savePlanner(p);
+    state.plannerDate = d;
+    history.replaceState({}, '', '/');
+    switchTab('planner');
+  } catch(e) {}
+}
+
+// ── 가게 상세 모달 ────────────────────────────────────
+async function openModal(id) {
+  const overlay = document.getElementById('modal');
+  const content = document.getElementById('modal-content');
+  overlay.classList.add('open');
+  content.innerHTML = '<div class="loading">불러오는 중...</div>';
+  try {
+    const { store: s, hours, exceptions } = await fetch(`/api/stores/${id}`).then(r => r.json());
+    const todayDow = (new Date().getDay()); // 0=일
+    content.innerHTML = `
+      <div class="modal-name">${esc(s.name)}</div>
+      <div class="modal-cat">${CATS[s.category]||s.category||''} ${s.price_range ? '· ' + (PRICE[s.price_range]||'') : ''}</div>
+      ${s.description ? `<div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.6">${esc(s.description)}</div>` : ''}
+      <div class="modal-section">
+        <div class="modal-section-title">영업시간</div>
+        <div class="hours-grid">${hoursGrid(hours, todayDow)}</div>
+      </div>
+      ${exceptions.length ? `<div class="modal-section">
+        <div class="modal-section-title">임시 변경</div>
+        ${exceptions.map(e=>`<div style="font-size:12px;margin-bottom:3px">
+          <strong>${e.date}</strong> — ${e.type==='closed'?'휴무':'특별영업'} ${e.note?`(${esc(e.note)})`:''}</div>`).join('')}
+      </div>` : ''}
+      ${s.address ? `<div style="font-size:12px;color:var(--text-muted);margin-top:8px">📍 ${esc(s.address)}</div>` : ''}
+      ${s.phone   ? `<div style="font-size:12px;color:var(--text-muted);margin-top:4px">📞 ${esc(s.phone)}</div>` : ''}
+      ${s.instagram ? `<div style="font-size:12px;color:var(--text-muted);margin-top:4px">📸 @${esc(s.instagram)}</div>` : ''}
+      ${s.menu_image_url ? `<div class="modal-section" style="margin-top:16px">
+        <div class="modal-section-title">메뉴판</div>
+        <img src="${esc(s.menu_image_url)}" style="max-width:100%;border-radius:8px;border:1px solid var(--border)">
+      </div>` : ''}
+    `;
+  } catch(e) {
+    content.innerHTML = '<div style="padding:20px;color:var(--text-sub)">불러오기 실패</div>';
+  }
+}
+
+function hoursGrid(hours, todayDow) {
+  if (!hours.length) return '<span style="color:var(--text-sub);font-size:12px">영업시간 미등록</span>';
+  return hours.map(h => {
+    const isToday = h.day_of_week === todayDow;
+    const dayClass = 'day' + (isToday ? ' today' : '');
+    const timeText = h.is_day_off ? '<span class="off">휴무</span>'
+      : h.open_time ? `${h.open_time} – ${h.close_time}${h.break_start?` <span style="color:var(--text-sub)">(브레이크 ${h.break_start}–${h.break_end})</span>`:''}`
+      : '<span class="off">-</span>';
+    return `<span class="${dayClass}">${DAYS[h.day_of_week]}</span><span class="time">${timeText}</span>`;
+  }).join('');
+}
+
+function closeModal(e) { if (e.target === document.getElementById('modal')) closeModalBtn(); }
+function closeModalBtn() { document.getElementById('modal').classList.remove('open'); }
+
+// ── 유틸 ─────────────────────────────────────────────
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function emptyHTML(msg) {
+  return `<div class="empty" style="grid-column:1/-1"><strong>${msg}</strong>잠시 후 다시 시도해보세요.</div>`;
+}
+
+// ── Init ─────────────────────────────────────────────
+importSharedPlan();
+loadNow();
+</script>
+</body>
+</html>
