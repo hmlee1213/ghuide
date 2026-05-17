@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>가게 관리 — 어디가시꺄</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F7F5F0;--surface:#fff;--border:#DDDAD3;--text:#1C1A17;--text-muted:#5A5750;--text-sub:#96938D;--green:#3D6B35;--green-light:#EAF2E7;--red:#C0392B;--red-light:#FDECEA;--radius:12px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);font-size:15px;-webkit-font-smoothing:antialiased;padding:0 0 60px;}
+header{background:var(--text);color:#fff;padding:16px 20px;text-align:center;}
+header h1{font-size:16px;font-weight:700;}
+header p{font-size:12px;color:rgba(255,255,255,.6);margin-top:2px;}
+.container{max-width:480px;margin:0 auto;padding:20px;}
+
+/* 오늘 휴무 토글 */
+.closed-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;text-align:center;}
+.closed-card.is-closed{border-color:var(--red);background:var(--red-light);}
+.closed-label{font-size:13px;color:var(--text-sub);margin-bottom:12px;}
+.btn-closed{width:100%;padding:16px;font-size:16px;font-weight:800;font-family:inherit;border-radius:10px;border:2px solid var(--border);background:var(--surface);color:var(--text-muted);cursor:pointer;transition:all .15s;}
+.btn-closed.active{background:var(--red);border-color:var(--red);color:#fff;}
+.btn-closed:not(.active):hover{border-color:var(--red);color:var(--red);}
+
+/* 섹션 */
+.section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px;}
+.section-title{font-size:13px;font-weight:700;color:var(--text-sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:4px;}
+.field input,.field textarea,.field select{width:100%;font-family:inherit;font-size:14px;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);outline:none;transition:border-color .12s;}
+.field input:focus,.field textarea:focus{border-color:var(--green);}
+.field textarea{resize:vertical;min-height:70px;line-height:1.5;}
+.field-hint{font-size:11px;color:var(--text-sub);margin-top:3px;}
+
+/* 저장 버튼 */
+.btn-save{width:100%;padding:15px;font-size:15px;font-weight:800;font-family:inherit;border-radius:10px;border:none;background:var(--green);color:#fff;cursor:pointer;transition:background .12s;}
+.btn-save:hover{background:var(--green-dark,#2A4E24);}
+.btn-save:disabled{background:var(--border);color:var(--text-sub);cursor:not-allowed;}
+
+/* 영업시간 표 */
+.hours-table{width:100%;border-collapse:collapse;}
+.hours-table td{padding:5px 4px;vertical-align:middle;font-size:13px;}
+.hours-table td:first-child{font-weight:700;width:28px;text-align:center;}
+.hours-table input[type=time]{font-family:inherit;font-size:13px;padding:5px 6px;border:1.5px solid var(--border);border-radius:6px;width:100%;outline:none;}
+.hours-table input[type=time]:focus{border-color:var(--green);}
+.hours-table input[type=checkbox]{width:16px;height:16px;cursor:pointer;}
+.day-off-row td{opacity:.4;}
+
+/* 예외 목록 */
+.exc-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.exc-item:last-child{border-bottom:none;}
+.btn-del{background:none;border:none;color:var(--text-sub);cursor:pointer;font-size:16px;padding:0 4px;}
+.btn-del:hover{color:var(--red);}
+
+/* 토스트 */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;z-index:999;}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="store-name">가게 관리</h1>
+  <p>어디가시꺄 — 가게 정보 수정</p>
+</header>
+
+<div class="container">
+  <div id="loading" style="text-align:center;padding:40px;color:var(--text-sub)">불러오는 중...</div>
+  <div id="content" style="display:none">
+
+    <!-- 오늘 휴무 토글 -->
+    <div class="closed-card" id="closed-card">
+      <div class="closed-label">오늘 영업 여부</div>
+      <button class="btn-closed" id="btn-closed" onclick="toggleClosed()">
+        오늘 영업합니다
+      </button>
+    </div>
+
+    <!-- 기본 정보 -->
+    <div class="section">
+      <div class="section-title">기본 정보</div>
+      <div class="field">
+        <label>소개</label>
+        <textarea id="f-description" placeholder="가게 한 줄 소개"></textarea>
+      </div>
+      <div class="field">
+        <label>전화번호</label>
+        <input id="f-phone" type="tel" placeholder="010-0000-0000">
+      </div>
+      <div class="field">
+        <label>인스타그램</label>
+        <input id="f-instagram" placeholder="계정명 (@ 제외)">
+      </div>
+      <div class="field">
+        <label>가격대</label>
+        <select id="f-price_range">
+          <option value="">선택 안 함</option>
+          <option value="low">저렴 (1만원 이하)</option>
+          <option value="mid">보통 (1~3만원)</option>
+          <option value="high">고가 (3만원 이상)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 메뉴 -->
+    <div class="section">
+      <div class="section-title">메뉴 정보</div>
+      <div class="field">
+        <label>메뉴판 사진 URL</label>
+        <input id="f-menu_image_url" placeholder="https://...">
+        <div class="field-hint">Cloudinary나 이미지 URL을 붙여넣으세요</div>
+      </div>
+      <div class="field">
+        <label>대표 메뉴 태그</label>
+        <input id="f-menu_tags" placeholder="아메리카노, 딸기라떼, 카레">
+        <div class="field-hint">쉼표로 구분해 3~5개 입력하세요</div>
+      </div>
+      <button class="btn-save" onclick="saveInfo()">정보 저장</button>
+    </div>
+
+    <!-- 영업시간 -->
+    <div class="section">
+      <div class="section-title">정기 영업시간</div>
+      <table class="hours-table" id="hours-table">
+        <tbody id="hours-tbody"></tbody>
+      </table>
+      <button class="btn-save" style="margin-top:14px" onclick="alert('영업시간 수정은 관리자에게 문의해주세요.')">영업시간 변경 요청</button>
+    </div>
+
+    <!-- 임시 변경 예정 -->
+    <div class="section" id="exc-section" style="display:none">
+      <div class="section-title">예정된 임시 변경</div>
+      <div id="exc-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TOKEN = '{{ token }}';
+const DAYS = ['일','월','화','수','목','금','토'];
+let storeData = null;
+let isClosedToday = false;
+
+async function load() {
+  try {
+    const res = await fetch(`/api/manage/${TOKEN}`);
+    if (!res.ok) { showError(); return; }
+    const data = await res.json();
+    storeData = data;
+    isClosedToday = data.is_closed_today;
+    render(data);
+  } catch(e) { showError(); }
+}
+
+function showError() {
+  document.getElementById('loading').innerHTML =
+    '<div style="color:#C0392B;padding:40px;text-align:center">유효하지 않은 링크입니다.<br>관리자에게 문의해주세요.</div>';
+}
+
+function render(data) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('content').style.display = '';
+  document.getElementById('store-name').textContent = data.store.name;
+
+  // 오늘 휴무
+  updateClosedUI();
+
+  // 기본정보
+  const s = data.store;
+  document.getElementById('f-description').value = s.description || '';
+  document.getElementById('f-phone').value = s.phone || '';
+  document.getElementById('f-instagram').value = s.instagram || '';
+  document.getElementById('f-price_range').value = s.price_range || '';
+  document.getElementById('f-menu_image_url').value = s.menu_image_url || '';
+  document.getElementById('f-menu_tags').value = (s.menu_tags || []).join(', ');
+
+  // 영업시간
+  const tbody = document.getElementById('hours-tbody');
+  const hoursMap = {};
+  data.hours.forEach(h => hoursMap[h.day_of_week] = h);
+  tbody.innerHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const h = hoursMap[i] || {};
+    const tr = document.createElement('tr');
+    if (h.is_day_off) tr.classList.add('day-off-row');
+    tr.innerHTML = `
+      <td>${DAYS[i]}</td>
+      <td>${h.open_time || '-'}</td>
+      <td style="color:var(--text-sub);font-size:11px;padding:0 4px">–</td>
+      <td>${h.close_time || '-'}</td>
+      <td style="color:var(--text-sub);font-size:11px">${h.break_start ? `브레이크 ${h.break_start}–${h.break_end}` : ''}</td>
+      <td style="text-align:right">${h.is_day_off ? '<span style="color:var(--red);font-size:12px;font-weight:700">휴무</span>' : ''}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  // 예외
+  const excs = data.exceptions.filter(e => e.date > new Date().toISOString().slice(0,10));
+  if (excs.length) {
+    document.getElementById('exc-section').style.display = '';
+    document.getElementById('exc-list').innerHTML = excs.map(e =>
+      `<div class="exc-item"><span>${e.date} — ${e.type === 'closed' ? '휴무' : '특별영업'}${e.note ? ' ('+e.note+')' : ''}</span></div>`
+    ).join('');
+  }
+}
+
+function updateClosedUI() {
+  const card = document.getElementById('closed-card');
+  const btn = document.getElementById('btn-closed');
+  if (isClosedToday) {
+    card.classList.add('is-closed');
+    btn.classList.add('active');
+    btn.textContent = '오늘 휴무 (클릭하면 취소)';
+  } else {
+    card.classList.remove('is-closed');
+    btn.classList.remove('active');
+    btn.textContent = '오늘 영업합니다';
+  }
+}
+
+async function toggleClosed() {
+  const btn = document.getElementById('btn-closed');
+  btn.disabled = true;
+  try {
+    const res = await fetch(`/api/manage/${TOKEN}/exception`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ date: new Date().toISOString().slice(0,10) })
+    });
+    const data = await res.json();
+    isClosedToday = data.action === 'added';
+    updateClosedUI();
+    toast(isClosedToday ? '오늘 휴무로 등록했어요' : '휴무를 취소했어요');
+  } catch(e) { toast('오류가 발생했어요'); }
+  btn.disabled = false;
+}
+
+async function saveInfo() {
+  const tags = document.getElementById('f-menu_tags').value
+    .split(',').map(t => t.trim()).filter(Boolean);
+  const body = {
+    description: document.getElementById('f-description').value,
+    phone: document.getElementById('f-phone').value,
+    instagram: document.getElementById('f-instagram').value,
+    price_range: document.getElementById('f-price_range').value,
+    menu_image_url: document.getElementById('f-menu_image_url').value,
+    menu_tags: tags,
+  };
+  try {
+    const res = await fetch(`/api/manage/${TOKEN}`, {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    if (res.ok) toast('저장했어요!');
+    else toast('저장 실패');
+  } catch(e) { toast('오류가 발생했어요'); }
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+load();
+</script>
+</body>
+</html>

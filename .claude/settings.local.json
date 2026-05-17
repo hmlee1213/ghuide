@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pandoc --track-changes=all \"/Users/hmlee/Downloads/로컬AI클럽 기획서모움.docx\" -o /tmp/local_ai_club.md)",
+      "Read(//tmp/**)",
+      "Read(//Users/hmlee/Library/Application Support/Claude/local-agent-mode-sessions/skills-plugin/67888730-7bf7-4526-963a-807539bf5447/69106ea8-8df7-46e3-bdcf-58a444345ed5/skills/docx/**)",
+      "Bash(python scripts/office/unpack.py \"/Users/hmlee/Downloads/로컬AI클럽 기획서모움.docx\" /tmp/local_ai_unpacked/)",
+      "Bash(python3 -c ' *)",
+      "Bash(ls /Users/hmlee/Desktop/ghuide && ls /Users/hmlee/Desktop/)"
+    ]
+  }
+}

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>어드민 — 어디가시꺄</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F0EFEA;--surface:#fff;--border:#DDDAD3;--text:#1C1A17;--text-muted:#5A5750;--text-sub:#96938D;--green:#3D6B35;--green-light:#EAF2E7;--red:#C0392B;--radius:10px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);font-size:14px;-webkit-font-smoothing:antialiased;}
+header{background:var(--text);color:#fff;padding:0 20px;height:50px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-size:16px;font-weight:800;}
+.btn-logout{font-size:12px;font-family:inherit;padding:5px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:transparent;color:rgba(255,255,255,.8);cursor:pointer;}
+.main{max-width:1100px;margin:0 auto;padding:24px 20px 80px;}
+
+/* 로그인 */
+.login-box{max-width:340px;margin:80px auto;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px;}
+.login-box h2{font-size:18px;font-weight:800;margin-bottom:20px;text-align:center;}
+.login-box input{width:100%;font-family:inherit;font-size:14px;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;outline:none;margin-bottom:10px;}
+.login-box input:focus{border-color:var(--green);}
+.btn-login{width:100%;padding:11px;font-size:14px;font-weight:700;font-family:inherit;border:none;border-radius:8px;background:var(--green);color:#fff;cursor:pointer;}
+.error-msg{color:var(--red);font-size:12px;margin-bottom:10px;text-align:center;}
+
+/* 섹션 헤더 */
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin:28px 0 14px;}
+.section-hd h2{font-size:16px;font-weight:800;}
+.btn-add{font-size:12px;font-weight:700;font-family:inherit;padding:7px 14px;border-radius:7px;border:1.5px solid var(--green);background:var(--green-light);color:var(--green);cursor:pointer;transition:all .12s;}
+.btn-add:hover{background:var(--green);color:#fff;}
+
+/* 가게 테이블 */
+table{width:100%;border-collapse:collapse;background:var(--surface);border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);}
+th{background:var(--bg);font-size:12px;font-weight:700;color:var(--text-muted);padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#FAFAF8;}
+.cat-badge{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--bg);color:var(--text-muted);}
+.active-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#3D9C50;margin-right:4px;}
+.inactive-dot{background:#CCC;}
+.action-btns{display:flex;gap:6px;}
+.btn-sm{font-size:11px;font-weight:700;font-family:inherit;padding:4px 10px;border-radius:5px;border:1.5px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;transition:all .12s;white-space:nowrap;}
+.btn-sm:hover{border-color:var(--text);color:var(--text);}
+.btn-sm.danger:hover{border-color:var(--red);color:var(--red);}
+.btn-sm.primary{border-color:var(--green);color:var(--green);}
+.btn-sm.primary:hover{background:var(--green);color:#fff;}
+
+/* 토큰 팝업 */
+.token-box{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:10px 12px;font-size:12px;word-break:break-all;margin-top:6px;color:var(--text-muted);}
+
+/* 가게 등록/수정 폼 */
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px;}
+.form-card h3{font-size:15px;font-weight:800;margin-bottom:18px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr;}}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field.full{grid-column:1/-1;}
+.field label{font-size:12px;font-weight:700;color:var(--text-muted);}
+.field input,.field select,.field textarea{font-family:inherit;font-size:13px;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);outline:none;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--green);}
+.field textarea{resize:vertical;min-height:60px;}
+.form-actions{display:flex;gap:8px;margin-top:18px;}
+.btn-submit{font-size:13px;font-weight:700;font-family:inherit;padding:9px 20px;border-radius:7px;border:none;background:var(--green);color:#fff;cursor:pointer;}
+.btn-cancel{font-size:13px;font-weight:700;font-family:inherit;padding:9px 20px;border-radius:7px;border:1.5px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;}
+
+/* 영업시간 폼 */
+.hours-form{width:100%;}
+.hours-form table{border:none;background:transparent;}
+.hours-form th{background:transparent;font-size:11px;}
+.hours-form td{padding:6px 8px;border-bottom:1px solid var(--border);}
+.hours-form input[type=time]{font-family:inherit;font-size:13px;padding:5px 7px;border:1.5px solid var(--border);border-radius:6px;outline:none;width:110px;}
+.hours-form input[type=time]:focus{border-color:var(--green);}
+.hours-form input[type=checkbox]{width:16px;height:16px;cursor:pointer;}
+</style>
+</head>
+<body>
+
+{% if login_mode %}
+<!-- 로그인 -->
+<div class="login-box">
+  <h2>어드민 로그인</h2>
+  {% if error %}<div class="error-msg">{{ error }}</div>{% endif %}
+  <form method="POST">
+    <input type="password" name="password" placeholder="비밀번호" autofocus>
+    <button class="btn-login" type="submit">로그인</button>
+  </form>
+</div>
+
+{% elif hours_mode %}
+<!-- 영업시간 설정 -->
+<header>
+  <div class="logo">어디가시꺄 어드민</div>
+  <a href="/admin/dashboard"><button class="btn-logout">← 목록으로</button></a>
+</header>
+<div class="main">
+  <div class="form-card">
+    <h3>{{ store.name }} — 영업시간 설정</h3>
+    <form method="POST" action="/admin/store/{{ store.id }}/hours">
+      <div class="hours-form">
+        <table>
+          <thead>
+            <tr>
+              <th>요일</th><th>오픈</th><th>마감</th>
+              <th>브레이크 시작</th><th>브레이크 종료</th><th>정기휴무</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% set days = [('sun','일'),('mon','월'),('tue','화'),('wed','수'),('thu','목'),('fri','금'),('sat','토')] %}
+            {% for key, label in days %}
+            {% set i = loop.index0 %}
+            {% set h = hours.get(i, {}) %}
+            <tr>
+              <td><strong>{{ label }}</strong></td>
+              <td><input type="time" name="{{ key }}_open" value="{{ h.get('open_time','') }}"></td>
+              <td><input type="time" name="{{ key }}_close" value="{{ h.get('close_time','') }}"></td>
+              <td><input type="time" name="{{ key }}_break_start" value="{{ h.get('break_start','') }}"></td>
+              <td><input type="time" name="{{ key }}_break_end" value="{{ h.get('break_end','') }}"></td>
+              <td style="text-align:center">
+                <input type="checkbox" name="{{ key }}_off" {% if h.get('is_day_off') %}checked{% endif %}>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="form-actions">
+        <button class="btn-submit" type="submit">저장</button>
+        <a href="/admin/dashboard"><button class="btn-cancel" type="button">취소</button></a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% else %}
+<!-- 대시보드 -->
+<header>
+  <div class="logo">어디가시꺄 어드민</div>
+  <a href="/admin/logout"><button class="btn-logout">로그아웃</button></a>
+</header>
+<div class="main">
+
+  <!-- 가게 등록 폼 -->
+  <div id="store-form" style="display:none">
+    <div class="form-card">
+      <h3 id="form-title">가게 등록</h3>
+      <form method="POST" action="/admin/store/save">
+        <input type="hidden" name="id" id="f-id">
+        <div class="form-grid">
+          <div class="field">
+            <label>가게 이름 *</label>
+            <input type="text" name="name" id="f-name" required placeholder="딸기책방">
+          </div>
+          <div class="field">
+            <label>카테고리</label>
+            <select name="category" id="f-category">
+              <option value="">선택</option>
+              <option value="cafe">카페</option>
+              <option value="restaurant">식사</option>
+              <option value="experience">체험</option>
+              <option value="attraction">명소</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label>주소</label>
+            <input type="text" name="address" id="f-address" placeholder="인천 강화군 ...">
+          </div>
+          <div class="field">
+            <label>전화번호</label>
+            <input type="text" name="phone" id="f-phone">
+          </div>
+          <div class="field">
+            <label>인스타그램</label>
+            <input type="text" name="instagram" id="f-instagram" placeholder="계정명 (@ 제외)">
+          </div>
+          <div class="field full">
+            <label>소개</label>
+            <textarea name="description" id="f-description" placeholder="가게 한 줄 소개"></textarea>
+          </div>
+          <div class="field full">
+            <label>메뉴판 이미지 URL</label>
+            <input type="text" name="menu_image_url" id="f-menu_image_url" placeholder="https://...">
+          </div>
+          <div class="field">
+            <label>대표 메뉴 태그 (쉼표 구분)</label>
+            <input type="text" name="menu_tags" id="f-menu_tags" placeholder="아메리카노, 딸기라떼">
+          </div>
+          <div class="field">
+            <label>가격대</label>
+            <select name="price_range" id="f-price_range">
+              <option value="">선택 안 함</option>
+              <option value="low">저렴</option>
+              <option value="mid">보통</option>
+              <option value="high">고가</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>활성화</label>
+            <select name="is_active" id="f-is_active">
+              <option value="on">활성</option>
+              <option value="off">비활성</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-submit" type="submit">저장 후 영업시간 설정 →</button>
+          <button class="btn-cancel" type="button" onclick="document.getElementById('store-form').style.display='none'">취소</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 가게 목록 -->
+  <div class="section-hd">
+    <h2>가게 목록 ({{ stores|length }}개)</h2>
+    <button class="btn-add" onclick="openForm()">+ 가게 등록</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>가게명</th><th>카테고리</th><th>주소</th>
+        <th>태그</th><th>영업시간</th><th>상태</th><th>관리</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for s in stores %}
+    <tr>
+      <td><strong>{{ s.name }}</strong></td>
+      <td><span class="cat-badge">{{ s.category or '-' }}</span></td>
+      <td style="color:var(--text-muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.address or '-' }}</td>
+      <td style="color:var(--text-sub);font-size:12px">{{ (s.menu_tags or []) | join(', ') }}</td>
+      <td style="color:var(--text-sub);font-size:12px">{{ s.hours_count or 0 }}일 설정됨</td>
+      <td>
+        <span class="{{ 'active' if s.is_active else 'inactive' }}-dot"></span>
+        {{ '활성' if s.is_active else '비활성' }}
+      </td>
+      <td>
+        <div class="action-btns">
+          <button class="btn-sm primary" onclick="showToken({{ s.id }})">링크</button>
+          <button class="btn-sm" onclick="editStore({{ s | tojson | safe }})">수정</button>
+          <a href="/admin/store/{{ s.id }}/hours"><button class="btn-sm">시간</button></a>
+          <form method="POST" action="/admin/store/{{ s.id }}/delete" style="display:inline"
+                onsubmit="return confirm('비활성화할까요?')">
+            <button class="btn-sm danger" type="submit">삭제</button>
+          </form>
+        </div>
+        <div id="token-{{ s.id }}" style="display:none"></div>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-sub)">등록된 가게가 없어요. 위에서 추가해보세요.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+{% endif %}
+
+<script>
+function openForm(store) {
+  document.getElementById('store-form').style.display = '';
+  document.getElementById('form-title').textContent = store ? '가게 수정' : '가게 등록';
+  ['id','name','category','address','phone','instagram','description','menu_image_url','menu_tags','price_range','is_active'].forEach(k => {
+    const el = document.getElementById('f-' + k);
+    if (!el) return;
+    if (store) {
+      if (k === 'menu_tags') el.value = (store[k] || []).join(', ');
+      else if (k === 'is_active') el.value = store[k] ? 'on' : 'off';
+      else el.value = store[k] || '';
+    } else {
+      el.value = '';
+    }
+  });
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function editStore(s) { openForm(s); }
+
+async function showToken(id) {
+  const box = document.getElementById('token-' + id);
+  if (box.style.display !== 'none') { box.style.display = 'none'; return; }
+  box.innerHTML = '불러오는 중...';
+  box.style.display = '';
+  const data = await fetch('/admin/store/' + id + '/token').then(r => r.json());
+  box.innerHTML = `<div class="token-box">
+    <strong>사장님 관리 링크</strong><br>${data.url}
+    <button onclick="navigator.clipboard.writeText('${data.url}').then(()=>alert('복사됨!'))"
+      style="font-size:11px;margin-left:8px;padding:2px 8px;border-radius:4px;border:1px solid var(--border);background:var(--surface);cursor:pointer">복사</button>
+  </div>`;
+}
+</script>
+</body>
+</html>
